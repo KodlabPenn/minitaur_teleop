@@ -1,0 +1,7 @@
+<launch>
+    <node name="joy" pkg="joy" type="joy_node" output="screen"/>
+    <node name="minitaur_teleop" pkg="minitaur_teleop" type="command_publisher.py" output="screen">
+        <remap from="/set_cmd" to="/minitaur/set_cmd"/>
+        <remap from="/set_twist" to="/minitaur/set_twist"/>
+    </node>
+</launch>
