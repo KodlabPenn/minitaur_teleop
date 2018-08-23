@@ -48,11 +48,11 @@ def callback(data):
 	twist = Twist()
 
 	# Define forward velocity
-	lin_x = data.axes[4] * 0.5
+	lin_x = data.axes[3] * 0.5
 	twist.linear.x = lin_x
 
 	# Define angular yaw rate
-	angular_z = -data.axes[3] * 0.15
+	angular_z = -data.axes[2] * 0.15
 	twist.angular.z = angular_z
 
 	# Define robot height
