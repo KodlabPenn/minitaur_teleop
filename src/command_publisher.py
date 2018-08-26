@@ -13,9 +13,14 @@ pub_twist = rospy.Publisher('/set_twist', Twist , queue_size=1)
 behavior = 0
 mode = 0
 
-# Available commands
-BEHAVIOR_BOUND = 0
-BEHAVIOR_WALK = 1
+# Behaviors
+BEHAVIOR_BOUND_SDK = 0
+BEHAVIOR_WALK_SDK  = 1
+BEHAVIOR_WALK      = 2
+BEHAVIOR_PUSHWALK  = 3
+BEHAVIOR_MOUNT     = 4
+
+# Modes
 MODE_STAND = 0
 MODE_START = 1
 
@@ -24,7 +29,7 @@ def callback(data):
 
 	#X - unused
 	if (data.buttons[2] == 1):
-		a = 1
+		behavior = BEHAVIOR_WALK
 	#A
 	elif (data.buttons[0] == 1):
 		mode = MODE_STAND
@@ -33,16 +38,16 @@ def callback(data):
 		mode = MODE_START
 	#B
 	elif (data.buttons[1] == 1):
-		behavior = BEHAVIOR_BOUND
+		behavior = BEHAVIOR_BOUND_SDK
 	#Y
 	elif (data.buttons[3] == 1):
-		behavior = BEHAVIOR_WALK
+		behavior = BEHAVIOR_WALK_SDK
 	#RB - unused
 	elif (data.buttons[5] == 1):
-		a = 1
+		behavior = BEHAVIOR_MOUNT
 	#LB
 	elif (data.buttons[4] == 1):
-		a = 1
+		behavior = BEHAVIOR_PUSHWALK
 	
 	# Define twist
 	twist = Twist()
