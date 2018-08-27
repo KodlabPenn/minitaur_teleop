@@ -15,11 +15,10 @@ behavior = 0
 mode = 0
 
 # Behaviors
-BEHAVIOR_BOUND_SDK = 0
-BEHAVIOR_WALK_SDK  = 1
-BEHAVIOR_WALK      = 2
-BEHAVIOR_PUSHWALK  = 3
-BEHAVIOR_MOUNT     = 4
+BEHAVIOR_WALK      = 0
+BEHAVIOR_KILL      = 1
+BEHAVIOR_PUSHWALK  = 2
+BEHAVIOR_MOUNT     = 3
 
 # Modes
 MODE_STAND = 0
@@ -63,22 +62,22 @@ def callback(data):
 	global behavior, mode
 	global LinearCmdBuffer, AngularCmdBuffer
 
-	#X - unused
+	#X
 	if (data.buttons[2] == 1):
-		behavior = BEHAVIOR_WALK
+		behavior = BEHAVIOR_KILL
 	#A
 	elif (data.buttons[0] == 1):
 		mode = MODE_STAND
 	#START
 	elif (data.buttons[7] == 1):
 		mode = MODE_START
-	#B
+	#B - unused
 	elif (data.buttons[1] == 1):
-		behavior = BEHAVIOR_BOUND_SDK
+		a = 1
 	#Y
 	elif (data.buttons[3] == 1):
-		behavior = BEHAVIOR_WALK_SDK
-	#RB - unused
+		behavior = BEHAVIOR_WALK
+	#RB
 	elif (data.buttons[5] == 1):
 		behavior = BEHAVIOR_MOUNT
 	#LB
