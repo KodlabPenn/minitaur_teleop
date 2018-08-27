@@ -114,8 +114,14 @@ def callback(data):
 	return
 
 def init():
+	global LinearCmdBuffer, AngularCmdBuffer
+
 	# Initialize node
 	rospy.init_node('command_publisher', anonymous=True)
+
+	# Initialize linear and angular command buffers
+	LinearCmdBuffer = numpy.zeros(LowpassSamples)
+	AngularCmdBuffer = numpy.zeros(LowpassSamples)
 	
 	# Subscribe to joy commands
 	rospy.Subscriber("/joy", Joy, callback)
