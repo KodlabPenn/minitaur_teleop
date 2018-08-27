@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-import rospy, struct
+import rospy, struct, numpy
 from sensor_msgs.msg import Joy
 from std_msgs.msg import UInt32, Float32
 from geometry_msgs.msg import Twist
+from scipy.signal import butter, lfilter
 
 # Define publishers
 pub_behaviorId = rospy.Publisher('/set_behaviorId', UInt32, queue_size=1)
@@ -24,8 +25,43 @@ BEHAVIOR_MOUNT     = 4
 MODE_STAND = 0
 MODE_START = 1
 
+# Filter parameters
+global LinearCmdBuffer, AngularCmdBuffer
+LowpassCutoff = 4.
+LowpassSampling = 25
+LowpassOrder = 6
+LowpassSamples = 40
+
+
+
+# Function that generates the filter coefficients based on a cutoff frequency and a sampling rate
+# Input  - 1) cutoff: Cutoff frequency
+#          2) fs: Sampling frequency
+#          3) order: Order of the filter
+# Output - 1) b: Numerator coefficient array
+#          2) a: Denominator coefficient array
+def butter_lowpass(cutoff, fs, order=5):
+    nyq = 0.5 * fs
+    normal_cutoff = cutoff/nyq
+    b, a = butter(order, normal_cutoff, btype='low', analog=False)
+    return b, a
+
+
+# Function that filters the desired data based on a cutoff frequency and a sampling frequency
+# Input  - 1) data: Data array
+#          2) cutoff: Cutoff frequency
+#          3) fs: Sampling frequency
+#          4) order: Order of the filter
+# Output - 1) y: Filtered version of the input data
+def butter_lowpass_filter(data, cutoff, fs, order=5):
+    b, a = butter_lowpass(cutoff, fs, order=order)
+    y = lfilter(b, a, data)
+    return y
+
+# Main callback function
 def callback(data):
 	global behavior, mode
+	global LinearCmdBuffer, AngularCmdBuffer
 
 	#X - unused
 	if (data.buttons[2] == 1):
@@ -53,26 +89,31 @@ def callback(data):
 	twist = Twist()
 
 	# Define forward velocity
-	lin_x = data.axes[3]
-	twist.linear.x = lin_x
+	LinearCmdRaw = data.axes[3]
+	LinearCmdBuffer = numpy.hstack((LinearCmdBuffer[1:],numpy.array([LinearCmdRaw])))
+	LinearCmdBufferFlt = butter_lowpass_filter(LinearCmdBuffer, LowpassCutoff, LowpassSampling, LowpassOrder)
+	LinearCmd = LinearCmdBufferFlt[-1]
+	twist.linear.x = LinearCmd
 
 	# Define angular yaw rate
-	angular_z = data.axes[2]
-	twist.angular.z = angular_z
+	AngularCmdRaw = data.axes[2]
+	AngularCmdBuffer = numpy.hstack((AngularCmdBuffer[1:],numpy.array([AngularCmdRaw])))
+	AngularCmdBufferFlt = butter_lowpass_filter(AngularCmdBuffer, LowpassCutoff, LowpassSampling, LowpassOrder)
+	AngularCmd = AngularCmdBufferFlt[-1]
+	twist.angular.z = AngularCmd
 
 	# Define robot height
-	height = data.axes[1]
-	twist.linear.z = height
+	HeightCmd = data.axes[1]
+	twist.linear.z = HeightCmd
 	
 	# Log info and publish
-	rospy.loginfo("%d %d %.4f %.4f %.4f", behavior, mode, lin_x, angular_z, height)
+	rospy.loginfo("%d %d %.4f %.4f %.4f", behavior, mode, LinearCmd, AngularCmd, HeightCmd)
 	pub_behaviorId.publish(behavior)
 	pub_behaviorMode.publish(mode)
 	pub_twist.publish(twist)
 	return
 
 def init():
-	
 	# Initialize node
 	rospy.init_node('command_publisher', anonymous=True)
 	
