@@ -19,7 +19,7 @@ BEHAVIOR_WALK      = 0
 BEHAVIOR_KILL      = 1
 BEHAVIOR_PUSHWALK  = 2
 BEHAVIOR_MOUNT     = 3
-BEHAVIOR_INDEXB    = 4
+BEHAVIOR_JUMP      = 4
 
 # Modes
 MODE_STAND = 0
@@ -72,9 +72,9 @@ def callback(data):
 	#START
 	elif (data.buttons[7] == 1):
 		mode = MODE_START
-	#B - unused
+	#B
 	elif (data.buttons[1] == 1):
-		behavior = BEHAVIOR_INDEXB
+		behavior = BEHAVIOR_JUMP
 	#Y
 	elif (data.buttons[3] == 1):
 		behavior = BEHAVIOR_WALK
