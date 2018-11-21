@@ -58,6 +58,10 @@ LowpassCutoff = 4.
 LowpassSampling = 25
 LowpassOrder = 6
 LowpassSamples = 40
+MaxLinearCmd = 0.3
+MinLinearCmd = 0.
+MaxAngularCmd = 0.2
+MinAngularCmd = -0.2
 
 
 
@@ -120,14 +124,14 @@ def callback(data):
 	LinearCmdBuffer = numpy.hstack((LinearCmdBuffer[1:],numpy.array([LinearCmdRaw])))
 	LinearCmdBufferFlt = butter_lowpass_filter(LinearCmdBuffer, LowpassCutoff, LowpassSampling, LowpassOrder)
 	LinearCmd = LinearCmdBufferFlt[-1]
-	twist.linear.x = LinearCmd
+	twist.linear.x = numpy.maximum(numpy.minimum(LinearCmd, MaxLinearCmd), MinLinearCmd)
 
 	# Define angular yaw rate
 	AngularCmdRaw = data.axes[2]
 	AngularCmdBuffer = numpy.hstack((AngularCmdBuffer[1:],numpy.array([AngularCmdRaw])))
 	AngularCmdBufferFlt = butter_lowpass_filter(AngularCmdBuffer, LowpassCutoff, LowpassSampling, LowpassOrder)
 	AngularCmd = AngularCmdBufferFlt[-1]
-	twist.angular.z = AngularCmd
+	twist.angular.z = numpy.maximum(numpy.minimum(AngularCmd, MaxAngularCmd), MinAngularCmd)
 
 	# Define robot height
 	HeightCmd = data.axes[1]
