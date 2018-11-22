@@ -58,10 +58,10 @@ LowpassCutoff = 4.
 LowpassSampling = 25
 LowpassOrder = 6
 LowpassSamples = 40
-MaxLinearCmd = 0.3
+MaxLinearCmd = 0.2
 MinLinearCmd = 0.
-MaxAngularCmd = 0.2
-MinAngularCmd = -0.2
+MaxAngularCmd = 0.6
+MinAngularCmd = -0.6
 
 
 
@@ -120,14 +120,14 @@ def callback(data):
 	twist = Twist()
 
 	# Define forward velocity
-	LinearCmdRaw = data.axes[3]
+	LinearCmdRaw = data.axes[4]
 	LinearCmdBuffer = numpy.hstack((LinearCmdBuffer[1:],numpy.array([LinearCmdRaw])))
 	LinearCmdBufferFlt = butter_lowpass_filter(LinearCmdBuffer, LowpassCutoff, LowpassSampling, LowpassOrder)
 	LinearCmd = LinearCmdBufferFlt[-1]
 	twist.linear.x = numpy.maximum(numpy.minimum(LinearCmd, MaxLinearCmd), MinLinearCmd)
 
 	# Define angular yaw rate
-	AngularCmdRaw = data.axes[2]
+	AngularCmdRaw = data.axes[3]
 	AngularCmdBuffer = numpy.hstack((AngularCmdBuffer[1:],numpy.array([AngularCmdRaw])))
 	AngularCmdBufferFlt = butter_lowpass_filter(AngularCmdBuffer, LowpassCutoff, LowpassSampling, LowpassOrder)
 	AngularCmd = AngularCmdBufferFlt[-1]
